@@ -1,33 +1,44 @@
 <?php
-
 namespace PropertyFinder;
 
+/**
+ * Property Finder recursively traverses an iterable object
+ * and returns an array of found properties by key name.
+ *
+ * $first is an optional parameter, which forces only
+ * the first result to be returned.
+ */
 class PropertyFinder
 {
-
-    public function __construct()
+    public function get($haystack = [], $needle = '', $first = false)
     {
-        //
+        return array_filter($this->traverse($haystack, $needle, $first), function ($value) {
+            return !empty($value);
+        });
     }
 
-    public static function get($object, $propertyName, $single = false, $result = [])
+    protected function traverse($haystack, $needle, $first, $result = [])
     {
-        foreach ($object as $key => $val) {
-            if ($key === $propertyName) {
-                if ($single) {
-                    $result = $val;
+        if (! is_iterable($haystack)) {
+            var_dump($haystack);
+            return null;
+        }
+
+        foreach ($haystack as $key => $val) {
+            if ($key === $needle) {
+                if ($first) {
+                    return [$val];
                 } else {
-                    $result[$key] = $val;
+                    $result[] = $val;
                 }
-            } elseif (is_object($val) || is_array($val)) {
-                $temp = extractProperties($val, $propertyName);
-                if ($single) {
-                    !empty($temp) ? $result = $temp : null;
-                } else {
-                    !empty($temp) ? $result[$key] = $temp : null;
+            } else {
+                $foundProperty = $this->traverse($val, $needle, $first, $result);
+                if (!is_null($foundProperty)) {
+                    $result = $foundProperty;
                 }
             }
         }
+
         return $result;
     }
 }
