@@ -20,7 +20,6 @@ class PropertyFinder
     protected function traverse($haystack, $needle, $first, $result = [])
     {
         if (! is_iterable($haystack)) {
-            var_dump($haystack);
             return null;
         }
 
